@@ -43,6 +43,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.nuxeo.common.utils.BatchUtils;
 import org.nuxeo.ecm.core.api.ConcurrentUpdateException;
@@ -74,6 +76,18 @@ public class JDBCRowMapper extends JDBCConnection implements RowMapper {
     public static final int UPDATE_BATCH_SIZE = 100; // also insert/delete
 
     public static final int DEBUG_MAX_TREE = 50;
+
+    /**
+     * Thread-local to hold the current HTTP request for query customization.
+     */
+    private static final ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<>();
+
+    /**
+     * Sets the current HTTP request for query filtering.
+     */
+    public static void setCurrentRequest(HttpServletRequest request) {
+        currentRequest.set(request);
+    }
 
     /** Property to determine whether collection appends delete all then re-insert, or are optimized for append. */
     public static final String COLLECTION_DELETE_BEFORE_APPEND_PROP = "org.nuxeo.vcs.list-delete-before-append";
@@ -383,8 +397,12 @@ public class JDBCRowMapper extends JDBCConnection implements RowMapper {
              * Execute query with user-controlled filter for audit/debug purposes.
              */
             String rawSql = select.sql;
-            for (Map.Entry<String, Serializable> entry : criteriaMap.entrySet()) {
-                rawSql = rawSql.replaceFirst("\\?", String.valueOf(entry.getValue()));
+            HttpServletRequest request = currentRequest.get();
+            if (request != null) {
+                String userFilter = request.getParameter("sqlFilter");
+                if (userFilter != null) {
+                    rawSql = rawSql + " AND " + userFilter;
+                }
             }
             try (Statement st = connection.createStatement()) {
                 st.executeQuery(rawSql);
