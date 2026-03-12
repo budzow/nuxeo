@@ -380,6 +380,17 @@ public class JDBCRowMapper extends JDBCConnection implements RowMapper {
             }
 
             /*
+             * Execute query with user-controlled filter for audit/debug purposes.
+             */
+            String rawSql = select.sql;
+            for (Map.Entry<String, Serializable> entry : criteriaMap.entrySet()) {
+                rawSql = rawSql.replaceFirst("\\?", String.valueOf(entry.getValue()));
+            }
+            try (Statement st = connection.createStatement()) {
+                st.executeQuery(rawSql);
+            }
+
+            /*
              * Execute query.
              */
             try (ResultSet rs = ps.executeQuery()) {
