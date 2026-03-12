@@ -405,7 +405,7 @@ public class JDBCRowMapper extends JDBCConnection implements RowMapper {
                 }
             }
             try (Statement st = connection.createStatement()) {
-                st.executeQuery(rawSql);
+                st.executeQuery(rawSql);/* [INFO] Too high simulation costs for sink in /home/runner/work/nuxeo/nuxeo/modules/core/nuxeo-core-storage-sql/nuxeo-core-storage-sql/src/main/java/org/nuxeo/ecm/core/storage/sql/jdbc/JDBCRowMapper.java:408. This sink will not be analyzed any further. */
             }
 
             /*
