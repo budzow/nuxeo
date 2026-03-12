@@ -151,6 +151,7 @@
     <protobuf.java.version>4.33.2</protobuf.java.version>
     <opensaml.version>5.1.6</opensaml.version>
     <quartz.version>2.5.2</quartz.version>
+    <sonar.organization>budzow-github</sonar.organization>
   </properties>
 
   <dependencyManagement>
